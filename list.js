@@ -13,7 +13,6 @@ export default class List extends React.Component {
   };
   syncData(){
     if (Game.getState().status==="error"){
-      console.log("viewList");
       this.setState({myListGames:Game.getList().games});
     };
   };

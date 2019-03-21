@@ -25,7 +25,13 @@ function checkState(){
     else {
       if (isPlayer()){
         btnElem.classList.add("hidden");
-      }
+        if (currGameState.winner!=""){
+          clearInterval(timer);
+          console.log("stoptimer");
+          btnElem.classList.remove("hidden");
+          btnElem.value="НАЗАД";
+        }
+      };
     };
 
     let myMS=currGameState.gameDuration;
@@ -73,10 +79,16 @@ export default class GameBoard extends React.Component {
     };
     btnBack(){
       clearInterval(timer);
-      if (isPlayer()){
-            Game.doStep(-1,-1);
+      let currGameState={};
+      currGameState = Game.getState();
+      if (currGameState.status==="ok"){
+        if (currGameState.winner===""){
+          if (isPlayer()){
+                Game.doStep(-1,-1);
           };
-       this.props.CallBack("list");
+        }
+      }
+      this.props.CallBack("list");
     };
     componentDidMount(){
         checkState();
@@ -84,9 +96,15 @@ export default class GameBoard extends React.Component {
     };
     getBtnValue(){
         let myValue="НАЗАД";
-        if (isPlayer()){
-              myValue="СДАТЬСЯ";
-            };
+        let currGameState={};
+        currGameState = Game.getState();
+        if (currGameState.status==="ok"){
+          if (currGameState.winner===""){
+              if (isPlayer()){
+                    myValue="СДАТЬСЯ";
+                  };
+          }
+        }
         return myValue;
     };
     render() {

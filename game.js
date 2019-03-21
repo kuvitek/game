@@ -150,10 +150,10 @@ export default class Game {
             if ((row==-1)&&col==-1){
               myCurrGame.state="done";
               if (valueStep="X"){
-                myCurrGame.gameResult="owner";
+                myCurrGame.gameResult="opponent";
               }
               else {
-                myCurrGame.gameResult="opponent";
+                myCurrGame.gameResult="owner";
               }
             }
             else {
@@ -239,7 +239,6 @@ export default class Game {
             myRes = "draw";
           }
         };
-        console.log(myRes);
         return myRes;
       };
     if (currGameToken!=-1){
@@ -258,6 +257,12 @@ export default class Game {
             if (res.winner!=""){
               myCurrGame.state= "done";
               myCurrGame.gameResult=res.winner;
+            }
+            else{
+              if ((myCurrGame.state==="done")
+                &&(myCurrGame.gameResult!="")){
+                  res.winner = myCurrGame.gameResult;
+                }
             }
             let serialGame = JSON.stringify(myCurrGame);
             localStorage.setItem(currGameToken, serialGame);
