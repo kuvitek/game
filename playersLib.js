@@ -9,8 +9,12 @@ function getPlayerNames(tokenGame){
   if(tokenGame!=-1){
     let myGames = [];
     myGames = Game.getList().games;
-    myRes.owner = myGames.find(elem=>elem.gameToken===tokenGame)["owner"];
-    myRes.opponent = myGames.find(elem=>elem.gameToken===tokenGame)["opponent"];
+    let myGame={};
+    myGame=myGames.find(elem=>elem.gameToken===tokenGame);
+    if (typeof(myGame)!="undefined"){
+      myRes.owner = myGame["owner"];
+      myRes.opponent = myGame["opponent"];
+    }
   };
   return myRes;
 };

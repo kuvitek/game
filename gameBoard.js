@@ -27,7 +27,6 @@ function checkState(){
         btnElem.classList.add("hidden");
         if (currGameState.winner!=""){
           clearInterval(timer);
-          console.log("stoptimer");
           btnElem.classList.remove("hidden");
           btnElem.value="НАЗАД";
         }
@@ -65,6 +64,7 @@ export default class GameBoard extends React.Component {
     super(props);
     gameOwnerToken = Game.getList().games.find(elem=>elem.gameToken===this.props.TokenGame)["ownerToken"];
     gameOpponentToken = Game.getList().games.find(elem=>elem.gameToken===this.props.TokenGame)["opponentToken"];
+    this.state={cellsData:Game.getState().field};
   };
     cellClick(row,col){
       if (isPlayer()){
@@ -77,10 +77,15 @@ export default class GameBoard extends React.Component {
         }
       }
     };
+    refreshState(){
+      this.setState({cellsData:Game.getState().field});
+      checkState();
+    };
     btnBack(){
       clearInterval(timer);
       let currGameState={};
       currGameState = Game.getState();
+      console.log("back");
       if (currGameState.status==="ok"){
         if (currGameState.winner===""){
           if (isPlayer()){
@@ -92,7 +97,7 @@ export default class GameBoard extends React.Component {
     };
     componentDidMount(){
         checkState();
-        timer = window.setInterval(checkState,1000);
+        timer = window.setInterval(this.refreshState.bind(this),1000);
     };
     getBtnValue(){
         let myValue="НАЗАД";
@@ -109,19 +114,26 @@ export default class GameBoard extends React.Component {
     };
     render() {
         let myFields = [];
-        myFields = Game.getList().games.find(elem=>elem.gameToken===this.props.TokenGame)["field"];
-        return (
-            <div>
-                <div class="gamePlace">
-                    {
-                      myFields.map((item,index)=>{
-                            return <Row Number={index} RowData={item} ClickCell={this.cellClick.bind(this)}/>
-                      })
-                    }
-                </div>
-                <div class="playTime" id="timer">00:00:00</div>
-                <footer class="btnPlace"><input class="btnGame" type="button" value={this.getBtnValue()} onClick={this.btnBack.bind(this)} ></input></footer>
-            </div>
-            )
+        let myGame={};
+        myGame=Game.getState();
+        myFields = myGame.field;
+        if(myGame["code"]==0){
+          return (
+              <div>
+                  <div class="gamePlace">
+                      {
+                        myFields.map((item,index)=>{
+                              return <Row Number={index} RowData={item} ClickCell={this.cellClick.bind(this)}/>
+                        })
+                      }
+                  </div>
+                  <div class="playTime" id="timer">00:00:00</div>
+                  <footer class="btnPlace"><input class="btnGame" type="button" value={this.getBtnValue()} onClick={this.btnBack.bind(this)} ></input></footer>
+              </div>
+              )
+            }
+          else {
+            this.btnBack.bind(this);
+          }
     }
 };

@@ -10,6 +10,12 @@ export default class Cell extends React.Component {
       if (this.props.Number==0){
         myClass = myClass + " cell_fc";
       };
+      if (this.props.CellData=="X"){
+        myClass = myClass + " krestik";
+      };
+      if (this.props.CellData=="O"){
+        myClass = myClass + " nolik";
+      };
       return myClass;
     };
     clickCell(){
@@ -20,8 +26,7 @@ export default class Cell extends React.Component {
     render() {
         return (
             <div>
-              <div class={this.getCellClassName()} onClick={this.clickCell.bind(this)}> <img src="../game-react/sources/img/krest.svg"/>
-              </div>
+              <div class={this.getCellClassName()} onClick={this.clickCell.bind(this)}/>
             </div>
           );
     }

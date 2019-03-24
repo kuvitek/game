@@ -148,35 +148,35 @@ hr{
 
 }
 .newGame{
-	padding: 2px;
-	width: 95px;
-	height: 95px;
+	padding: 5px;
+	width: 117px;
+	height: 117px;
 	border: 1px solid #000000;
 	margin: 5px;
 	background: #828282;
-	font-size: 11pt;
+	font-size: 12pt;
 	color: #FFFFFF;
     cursor:pointer;
 }
 .currGame{
-	padding: 2px;
-	width: 95px;
-	height: 95px;
+	padding: 5px;
+	width: 117px;
+	height: 117px;
 	border: 1px solid #000000;
 	margin: 5px;
 	background: #bdbdbd;
-	font-size: 11pt;
+	font-size: 12pt;
 	color: #FFFFFF;
     cursor:pointer;
 }
 .endingGame{
-	padding: 2px;
-	width: 95px;
-	height: 95px;
+	padding: 5px;
+	width: 117px;
+	height: 117px;
 	border: 1px solid #000000;
 	margin: 5px;
 	background: #e0e0e0;
-	font-size: 11pt;
+	font-size: 12pt;
 }
 .no-cursor:{
     cursor: default;
@@ -185,11 +185,30 @@ hr{
 .player1{
 	height: 40%;
 	text-align: left;
-    border-bottom: 1px solid #000000;
+	display: flex;
+	flex-direction: row;
+}
+.separetorPlayers{
+	border-bottom: 1px solid #000000;
 }
 .player2{
+	padding-top: 5px;
 	height: 40%;
 	text-align: left;
+	display: flex;
+	flex-direction: row;
+}
+.winner{
+	color: #FF912F;
+}
+.playerName{
+	width: 100px;
+}
+.mark{
+	width: 20px;
+	background-image: url('../img/mark.svg');
+	background-repeat: no-repeat;
+	background-position: 0px -2px;
 }
 .timer{
 	height: 20%;
@@ -268,6 +287,14 @@ hr{
 .cell_fc{
 	border-left: 0;
 	margin-left: 10px;
+}
+.krestik{
+  background-image: url('../img/krest.svg');
+	background-repeat: no-repeat;
+}
+.nolik{
+  background-image: url('../img/circle.svg');
+	background-repeat: no-repeat;
 }
 .ico{
 	width: 35px;

@@ -12,14 +12,13 @@ export default class List extends React.Component {
       timer = window.setInterval(this.syncData.bind(this),1000);
   };
   syncData(){
-    if (Game.getState().status==="error"){
       this.setState({myListGames:Game.getList().games});
-    };
   };
     addGame(){
       let res = {};
       res = Game.newGame(User.getName(), 3);
       if (res.status=="ok"){
+        clearInterval(timer);
         this.props.CallBack("game",res.gameToken);
       }
       else{
@@ -30,6 +29,7 @@ export default class List extends React.Component {
       let res = {};
       res = Game.joinGame(gameItem["gameToken"],User.getName());
       if (res.status=="ok"){
+        clearInterval(timer);
         this.props.CallBack("game",gameItem.gameToken);
       }
       else {
