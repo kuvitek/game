@@ -7,8 +7,8 @@ let gameOwnerToken=-1;
 let gameOpponentToken=-1;
 let timer;
 function isPlayer(){
-  let res = (User.getToken()==gameOwnerToken)
-      ||User.getToken()==gameOpponentToken;
+  let res = (User.getToken()===gameOwnerToken)
+      ||User.getToken()===gameOpponentToken;
   return res;
 }
 function checkState(){
@@ -18,7 +18,7 @@ function checkState(){
   elem=document.querySelector(".playTime");
   btnElem = document.querySelector(".btnGame");
   currGameState = Game.getState();
-  if (currGameState.status=="ok"){
+  if (currGameState.status==="ok"){
     if (currGameState.youTurn){
       btnElem.classList.remove("hidden");
     }
@@ -70,7 +70,7 @@ export default class GameBoard extends React.Component {
       if (isPlayer()){
         let currGameState={};
         currGameState = Game.getState();
-        if (currGameState.status=="ok"){
+        if (currGameState.status==="ok"){
           if (currGameState.youTurn){
               Game.doStep(row,col);
           }
@@ -78,8 +78,15 @@ export default class GameBoard extends React.Component {
       }
     };
     refreshState(){
-      this.setState({cellsData:Game.getState().field});
-      checkState();
+      let currGameState={};
+      currGameState= Game.getState();
+      if (currGameState.code===0){
+        this.setState({cellsData:currGameState.field});
+        checkState();
+      }
+      else {
+        this.btnBack();
+      }
     };
     btnBack(){
       clearInterval(timer);
@@ -113,11 +120,11 @@ export default class GameBoard extends React.Component {
         return myValue;
     };
     render() {
-        let myFields = [];
         let myGame={};
         myGame=Game.getState();
-        myFields = myGame.field;
-        if(myGame["code"]==0){
+        if(myGame["code"]===0){
+          let myFields = [];
+          myFields = myGame.field;
           return (
               <div>
                   <div class="gamePlace">

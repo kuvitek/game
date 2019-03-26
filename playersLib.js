@@ -11,7 +11,7 @@ function getPlayerNames(tokenGame){
     myGames = Game.getList().games;
     let myGame={};
     myGame=myGames.find(elem=>elem.gameToken===tokenGame);
-    if (typeof(myGame)!="undefined"){
+    if ((typeof(myGame)!="undefined")&&(myGame!=null)){
       myRes.owner = myGame["owner"];
       myRes.opponent = myGame["opponent"];
     }

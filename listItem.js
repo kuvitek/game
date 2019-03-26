@@ -5,13 +5,13 @@ import Game from "./game";
 export default class ListItem extends React.Component {
     getClassName(gameState, gameOwner){
         let myClassName;
-        if (gameState=="ready"){
+        if (gameState==="ready"){
             myClassName = "newGame";
         };
-        if (gameState=="playing"){
+        if (gameState==="playing"){
             myClassName = "currGame";
         };
-        if (gameState=="done"){
+        if (gameState==="done"){
             myClassName = "endingGame";
         };
         if ((User.getName()===gameOwner)||(myClassName === "endingGame")){

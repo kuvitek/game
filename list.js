@@ -17,7 +17,7 @@ export default class List extends React.Component {
     addGame(){
       let res = {};
       res = Game.newGame(User.getName(), 3);
-      if (res.status=="ok"){
+      if (res.status==="ok"){
         clearInterval(timer);
         this.props.CallBack("game",res.gameToken);
       }
@@ -28,7 +28,7 @@ export default class List extends React.Component {
     selectGame(gameItem){
       let res = {};
       res = Game.joinGame(gameItem["gameToken"],User.getName());
-      if (res.status=="ok"){
+      if (res.status==="ok"){
         clearInterval(timer);
         this.props.CallBack("game",gameItem.gameToken);
       }
