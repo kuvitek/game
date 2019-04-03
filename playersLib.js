@@ -1,21 +1,25 @@
 import User from "./user";
 import Game from "./game";
+export {timer, getPlayerNames}
+
 let timer;
+
 function getPlayerNames(tokenGame){
-  let myRes={
+  let myResult={
     owner:User.getName(),
     opponent:""
   };
+
   if(tokenGame!=-1){
     let myGames = [];
     myGames = Game.getList().games;
     let myGame={};
-    myGame=myGames.find(elem=>elem.gameToken===tokenGame);
+    myGame=myGames.find(item=>item.gameToken===tokenGame);
     if ((typeof(myGame)!="undefined")&&(myGame!=null)){
-      myRes.owner = myGame["owner"];
-      myRes.opponent = myGame["opponent"];
+      myResult.owner = myGame["owner"];
+      myResult.opponent = myGame["opponent"];
     }
-  };
-  return myRes;
+  }
+
+  return myResult;
 };
-export {timer, getPlayerNames};

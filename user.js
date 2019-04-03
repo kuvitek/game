@@ -7,9 +7,9 @@ export default class User {
     currentUser = this;
   }
   static getName(){
-      return currentUser.myName;
+    return currentUser.myName;
   }
   static getToken(){
-      return currentUser.myToken;
+    return currentUser.myToken;
   }
 }

@@ -1,43 +1,21 @@
 'use strict;'
 import User from "./user";
-let currGameToken = -1;
-function getRes(code){
-  let myRes={status:"",code:0,message: ""};
-  myRes.code = code;
-  if (code===0){
-    myRes.status = "ok";
-    myRes.message = "ok";
-  }
-  else{
-    myRes.status = "error";
-  }
-  if (code===103){
-    myRes.message = "Ошибка при проставлении хода";
-  };
-  if (code===104){
-    myRes.message = "Текущая партия не установлена";
-  };
-  return myRes;
-};
-function getDurration(startDatetime,endDatetime){
-  let myd = new Date();
-  let myMS;
-  if (endDatetime===0){
-    myMS=myd.getTime()-startDatetime;
-  }
-  else {
-    myMS=endDatetime-startDatetime;
-  }
-  return myMS;
-};
+import * as Lib from './gameLib';
+import * as MyStorage from './localStorage';
+
+var DOWNTIME = 300000; //время простоя игры в статусе "ready"
+var GAME_READY = "ready";
+var GAME_PLAYING = "playing";
+var GAME_DONE = "done";
+
 export default class Game {
   constructor(owner, size) {
     if (User.getName==={}){
       new User(owner);
     };
     let myDate = new Date();
-    currGameToken = Math.round(Math.random()*100000000000);
-    this.gameToken= currGameToken;
+    Lib.currGameToken = Math.round(Math.random()*100000000000);
+    this.gameToken= Lib.currGameToken;
     this.owner= owner;
     this.ownerToken=User.getToken();
     this.opponent=""; // присоединенный игрок
@@ -45,154 +23,144 @@ export default class Game {
     this.size= size; // размер игрового поля
     this.startGameDate = myDate.getTime(); // дата и время создания игры
     this.endGameDate = 0; // дата окончания игры
-    this.gameResult= ""; // кто выиграл партию "" || "owner" || "opponent" || "draw"
-    this.state= "ready"; // статус игры, "ready” – готов, "playing” –идет игра, "done” - завершена
+    this.gameResult= Lib.NO_WINNER; // кто выиграл партию "" || "owner" || "opponent" || "draw"
+    this.state= GAME_READY; // статус игры, "ready” – готов, "playing” –идет игра, "done” - завершена
     this.lastUserStep=User.getToken();
-    this.field = initField(size);
-    function initField(size){
-      let arr = [];
-      let mystring="";
-      for (let i=0; i<size;i++){
-         mystring=mystring+"?";
-      };
-      for (let i=0; i<size;i++){
-         arr.push(mystring);
-      };
-      return arr;
-    };
+    this.field = Lib.initField(size);
   };
+
   static newGame(owner, size){
     let myGame={};
-    let res={};
+    let myResult={};
     let serialGames;
     try{
       myGame = new Game(owner,size);
-      serialGames = JSON.stringify(myGame);
-      localStorage.setItem(currGameToken, serialGames);
-      res = {
-            status: "ok",
-            code:0,
-            accessToken: myGame.ownerToken,
-            gameToken: myGame.gameToken,
-            message: "ok"
-          };
+      MyStorage.saveCurrentGame(Lib.currGameToken,myGame);
+      myResult = {
+                    status: "ok",
+                    code:0,
+                    accessToken: myGame.ownerToken,
+                    gameToken: myGame.gameToken,
+                    message: "ok"
+      };
     }
     catch{
-      res = {
-            status: "error",
-            code:100,
-            accessToken: "",
-            gameToken: "",
-            message: "Ошибка при создании игры"
-          };
+      myResult = {
+                    status: "error",
+                    code:100,
+                    accessToken: "",
+                    gameToken: "",
+                    message: "Ошибка при создании игры"
+      };
     };
-    return res;
+    return myResult;
   };
 
   static getList(){
-      let myGames = [];
-      let localGame = {};
-      let myGame = {"gameToken":-1,
-                    "owner": "",
-                    "ownerToken":-1,
-                    "opponent":"", // присоединенный игрок
-                    "opponentToken":-1,
-                    "size": 0, // размер игрового поля
-                    "startGameDate": 0,// дата и время создания игры
-                    "endGameDate": 0, // дата окончания игры
-                    "gameDuration":0,
-                    "gameResult": "", // кто выиграл партию "" || "owner" || "opponent" || "draw"
-                    "state": "", // статус игры, "ready” – готов, "playing” –идет игра, "done” - завершена
-                    "lastUserStep":-1,
-                    "field":[]
-                  };
-      let index;
-      if (localStorage.length>0){
-        for (index=0;index<localStorage.length;index++){
-          localGame=JSON.parse(localStorage.getItem(localStorage.key(index)));
-          myGame.gameToken=localGame.gameToken;
-          myGame.owner=localGame.owner;
-          myGame.ownerToken=localGame.ownerToken;
-          myGame.opponent=localGame.opponent;
-          myGame.opponentToken=localGame.opponentToken;
-          myGame.size=localGame.size;
-          myGame.startGameDate=localGame.startGameDate;
-          myGame.endGameDate=localGame.endGameDate;
-          myGame.gameDuration=getDurration(localGame.startGameDate,localGame.endGameDate);
-          myGame.gameResult=localGame.gameResult;
-          myGame.state=localGame.state;
-          myGame.lastUserStep=localGame.lastUserStep;
-          myGame.field=localGame.field;
-          if ((myGame.gameDuration<18000)||(myGame.state!="ready")){
-            myGames.push(myGame);
-          }
-          else {
-            if (currGameToken===myGame.gameToken){
-              localStorage.removeItem(currGameToken);
-              currGameToken=-1;
-            }
+    let myListGames = [];
+    let index;
+    if (MyStorage.getCountGames()>0){
+      for (index=0;index<MyStorage.getCountGames();index++){
+        let myGame = {"gameToken":-1,
+                      "owner": "",
+                      "ownerToken":-1,
+                      "opponent":"", // присоединенный игрок
+                      "opponentToken":-1,
+                      "size": 0, // размер игрового поля
+                      "startGameDate": 0,// дата и время создания игры
+                      "endGameDate": 0, // дата окончания игры
+                      "gameDuration":0,
+                      "gameResult": Lib.NO_WINNER, // кто выиграл партию "" || "owner" || "opponent" || "draw"
+                      "state": "", // статус игры, "ready” – готов, "playing” –идет игра, "done” - завершена
+                      "lastUserStep":-1,
+                      "field":[]
+                    };
+        let localGame = {};
+        localGame = MyStorage.getGameByIndex(index);
+        myGame.gameToken=localGame.gameToken;
+        myGame.owner=localGame.owner;
+        myGame.ownerToken=localGame.ownerToken;
+        myGame.opponent=localGame.opponent;
+        myGame.opponentToken=localGame.opponentToken;
+        myGame.size=localGame.size;
+        myGame.startGameDate=localGame.startGameDate;
+        myGame.endGameDate=localGame.endGameDate;
+        myGame.gameDuration=Lib.getDurration(localGame.startGameDate,localGame.endGameDate);
+        myGame.gameResult=localGame.gameResult;
+        myGame.state=localGame.state;
+        myGame.lastUserStep=localGame.lastUserStep;
+        myGame.field=localGame.field;
+        if ((myGame.gameDuration>DOWNTIME)&&(myGame.state===GAME_READY)){
+          if (Lib.currGameToken===myGame.gameToken){
+            MyStorage.deleteGameByToken(Lib.currGameToken)
+            Lib.currGameToken=-1;
           }
         }
-      };
-      let res={
-          status: "ok",
-          code: 0,
-          games: myGames
-      };
-      return res;
+        else {
+          myListGames.push(myGame);
+        }
+      }
+    };
+    let myResult={
+                    status: "ok",
+                    code: 0,
+                    games: myListGames
+        };
+    return myResult;
   };
 
   static joinGame(tokenGame,opponent){
     let myCurrGame={};
-    let res={};
+    let myResult={};
     let serialGame;
     if (User.getName()==={}){
       new User(opponent);
     };
-    myCurrGame = JSON.parse(localStorage.getItem(tokenGame));
+
+    myCurrGame = MyStorage.getGameByToken(tokenGame);
     if ((typeof(myCurrGame)==="undefined")
        ||(myCurrGame===null)){
-         res={
-               status: "error",
-               code:102,
-               accessToken: "",
-               message: "Ошибка при поиске игры"
+         myResult={
+                     status: "error",
+                     code:102,
+                     accessToken: "",
+                     message: "Ошибка при поиске игры"
          };
-         return res;
+         return myResult;
     };
     if ((myCurrGame["opponent"]==="")
-        &&(myCurrGame["state"]==="ready")){
+        &&(myCurrGame["state"]===GAME_READY)){
        myCurrGame["opponent"]=opponent;
        myCurrGame["opponentToken"]=User.getToken();
-       myCurrGame["state"]="playing";
+       myCurrGame["state"]=GAME_PLAYING;
        myCurrGame["lastUserStep"]=User.getToken();
-       serialGame = JSON.stringify(myCurrGame);
-       localStorage.setItem(tokenGame,serialGame);
+       MyStorage.saveCurrentGame(tokenGame,myCurrGame)
     };
-    res = {
-          status: "ok",
-          code:0,
-          accessToken: User.getToken(),
-          message: "ok"
-        };
-    currGameToken = myCurrGame.gameToken;
-    return res;
+    myResult = {
+                  status: "ok",
+                  code:0,
+                  accessToken: User.getToken(),
+                  message: "ok"
+    };
+    Lib.currGameToken = myCurrGame.gameToken;
+    return myResult;
   };
 
   static doStep(row, col){
     let valueStep;
     let myCurrGame={};
-    if (currGameToken===-1){
-      return getRes(104);
+    if (Lib.currGameToken===-1){
+      return Lib.getResult(104);
     }
-    let myGame=localStorage.getItem(currGameToken);
+    //let myGame=localStorage.getItem(Lib.currGameToken);
+    let myGame = MyStorage.getGameByToken(Lib.currGameToken);
     if (myGame===null){
-      return getRes(104);
+      return Lib.getResult(104);
     }
-    myCurrGame = JSON.parse(myGame);
+    myCurrGame = myGame;
     if ((typeof(myCurrGame)==="undefined")
          ||(myCurrGame===null)){
-      return getRes(104);
+      return Lib.getResult(104);
     };
     if (myCurrGame.owner===User.getName()){
         valueStep="X";
@@ -201,37 +169,36 @@ export default class Game {
         valueStep="O";
     };
     if ((row===-1)&&col===-1){
-        myCurrGame.state="done";
-        let myDate = new Date();
-        myCurrGame.endGameDate = myDate.getTime();
-        if (valueStep==="X"){
-            myCurrGame.gameResult="opponent";
-        }
-        else {
-            myCurrGame.gameResult="owner";
-        }
+      myCurrGame.state=GAME_DONE;
+      let myDate = new Date();
+      myCurrGame.endGameDate = myDate.getTime();
+      if (valueStep==="X"){
+          myCurrGame.gameResult=Lib.OPPONENT_WINNER;
+      }
+      else {
+          myCurrGame.gameResult=Lib.OWNER_WINNER;
+      }
     }
     else {
-        let myRow="";
-        let index;
-        for(index=0; index<myCurrGame.field[row].length;index++){
-            if(index===col){
-                myRow=myRow+valueStep;
-            }
-            else {
-                myRow=myRow+myCurrGame.field[row][index];
-            }
+      let myRow="";
+      let index;
+      for(index=0; index<myCurrGame.field[row].length;index++){
+        if(index===col){
+          myRow=myRow+valueStep;
         }
-        myCurrGame.field[row]=myRow;
-        myCurrGame.lastUserStep=User.getToken();
+        else {
+          myRow=myRow+myCurrGame.field[row][index];
+        }
+      }
+      myCurrGame.field[row]=myRow;
+      myCurrGame.lastUserStep=User.getToken();
     };
-    let serialGame = JSON.stringify(myCurrGame);
-    localStorage.setItem(currGameToken, serialGame);
-    return getRes(0);
+    MyStorage.saveCurrentGame(Lib.currGameToken,myCurrGame)
+    return Lib.getResult(0);
   };
 
   static getState(){
-    let res={};
+    let stateResult={};
     function currentTurn(lastUserStep){
       if (lastUserStep!=User.getToken()){
         return true;
@@ -240,81 +207,43 @@ export default class Game {
         return false;
       };
     };
-    function getWinner(field, owner, opponent){
-      let winstr1="";
-      let winstr2="";
-      let myNAexist= false;
-      let arrLen;
-      let i;
-      let i2;
-      let tmpstr="";
-      let myRes="";
-      arrLen= field.length;
-      let res= new Array(2*arrLen+2);
-      for (i=0;i<2*arrLen+2;i++){
-        res[i]="";
-      }
-      for(i=0;i<arrLen;i++){
-          res[i]= res[i]+field[i];
-          for(i2=0;i2<arrLen;i2++){
-            res[arrLen+i2]=res[arrLen+i2]+field[i][i2];
-            if (field[i][i2]==="?"){
-              myNAexist=true;
-            }
-          }
-          res[2*arrLen]=res[2*arrLen]+field[i][i];
-          res[2*arrLen+1]=res[2*arrLen+1]+field[i][arrLen-1-i];
-          winstr1=winstr1+"X";
-          winstr2=winstr2+"O";
-      };
-      for(i=0;i<2*arrLen+2;i++){
-          if (res[i]===winstr1){
-            myRes = "owner";
-          };
-          if (res[i]===winstr2)	{
-            myRes = "opponent";
-          };
-          if ((myRes==="")&&(!myNAexist)){
-            myRes = "draw";
-          }
-        };
-        return myRes;
-      };
-    if (currGameToken===-1){
-        return getRes(104);
-      };
-    let myGame=localStorage.getItem(currGameToken);
+
+    if (Lib.currGameToken===-1){
+        return Lib.getResult(104);
+    };
+    let myGame = MyStorage.getGameByToken(Lib.currGameToken);
     if (myGame===null){
-      return getRes(104);
+      return Lib.getResult(104);
     }
+
     let myCurrGame={};
-    myCurrGame = JSON.parse(myGame);
+    myCurrGame = myGame;
     if ((typeof(myCurrGame)==="undefined")
        ||(myCurrGame===null)){
-      return getRes(104);
+      return Lib.getResult(104);
     };
-    res={
+
+    stateResult={
           status: "ok",
           code: 0,
           youTurn: currentTurn(myCurrGame.lastUserStep), //true, // true если сейчас ходит запрашивающий
-          gameDuration: getDurration(myCurrGame.startGameDate,myCurrGame.endGameDate), // в миллисекундах
-          field: JSON.parse(localStorage.getItem(currGameToken))["field"],
-          winner : getWinner(JSON.parse(localStorage.getItem(currGameToken))["field"],myCurrGame.owner,myCurrGame.opponent) // выставляется если в игре определился победитель
+          gameDuration: Lib.getDurration(myCurrGame.startGameDate,myCurrGame.endGameDate), // в миллисекундах
+          field: MyStorage.getGameByToken(Lib.currGameToken)["field"],
+          winner : Lib.getWinner(MyStorage.getGameByToken(Lib.currGameToken)["field"],myCurrGame.owner,myCurrGame.opponent) // выставляется если в игре определился победитель
     };
-    if (res.winner===""){
-      if ((myCurrGame.state==="done")
-        &&(myCurrGame.gameResult!="")){
-          res.winner = myCurrGame.gameResult;
-        }
+    if (stateResult.winner===""){
+      if ((myCurrGame.state===GAME_DONE)
+        &&(myCurrGame.gameResult!=Lib.NO_WINNER)){
+          stateResult.winner = myCurrGame.gameResult;
+      }
     }
     else{
-      myCurrGame.state= "done";
+      myCurrGame.state= GAME_DONE;
       let myDate = new Date();
       myCurrGame.endGameDate = myDate.getTime();
-      myCurrGame.gameResult=res.winner;
+      myCurrGame.gameResult=stateResult.winner;
     }
-    let serialGame = JSON.stringify(myCurrGame);
-    localStorage.setItem(currGameToken, serialGame);
-    return res;
+    MyStorage.saveCurrentGame(Lib.currGameToken,myCurrGame)
+    return stateResult;
   };
 }
