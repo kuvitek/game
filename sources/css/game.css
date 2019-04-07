@@ -13,9 +13,9 @@ body{
 	background: #FFFFFF;
 }
 #root{
-    	width: 600px;
+	width: 600px;
 	background: #EEEEEE;
-   	margin-bottom: 0px;
+ 	margin-bottom: 0px;
 	height: 100%;
 
 }
@@ -83,7 +83,7 @@ hr{
 .content{
 	display: flex;
 	flex-direction: row;
-   	flex-wrap: wrap;
+ 	flex-wrap: wrap;
 	padding-left: 21px;
 	padding-right: 21px;
 }
@@ -129,7 +129,7 @@ hr{
 	border: 0px;
 	box-shadow: 0px 3px 4px rgba(94, 99, 102, 0.15);
 	font-size: 12pt;
-    	cursor:pointer;
+	cursor:pointer;
 }
 .nickName{
 	width: 170px;
@@ -153,7 +153,7 @@ hr{
 	background: #828282;
 	font-size: 12pt;
 	color: #FFFFFF;
-   	cursor:pointer;
+ 	cursor:pointer;
 }
 .currGame{
 	padding: 5px;
@@ -164,7 +164,7 @@ hr{
 	background: #bdbdbd;
 	font-size: 12pt;
 	color: #FFFFFF;
-   	cursor:pointer;
+ 	cursor:pointer;
 }
 .endingGame{
 	padding: 5px;
@@ -176,7 +176,7 @@ hr{
 	font-size: 12pt;
 }
 .no-cursor:{
-    	cursor: default;
+	cursor: default;
 }
 
 .player1{
@@ -227,7 +227,7 @@ hr{
 	width: 60px;
 	height: 60px;
 	background: #019788;
-   	background-image: url('../img/plus.svg');
+ 	background-image: url('../img/plus.svg');
 	background-repeat: no-repeat;
 	background-position: 20px 20px;
 	border: 0px;
@@ -255,7 +255,7 @@ hr{
 	flex-direction: row;
 	padding-left: 24px;
 	padding-right: 24px;
-    	cursor:pointer;
+	cursor:pointer;
 }
 .btnGame{
 	border-radius: 5px;
@@ -266,7 +266,7 @@ hr{
 	border: 0px;
 	font-size: 12pt;
 	box-shadow: 0px 3px 4px rgba(94, 99, 102, 0.15);
-    	cursor:pointer;
+	cursor:pointer;
 }
 .cell{
 	padding: 2px;
@@ -275,7 +275,7 @@ hr{
 	border: 10px solid #fcc44c;
 	border-bottom: 0;
 	border-right: 0;
-    	cursor:pointer;
+	cursor:pointer;
 }
 .cell_fr{
 	border-top: 0;
@@ -286,17 +286,27 @@ hr{
 	margin-left: 10px;
 }
 .krestik{
-  	background-image: url('../img/krest.svg');
+	background-image: url('../img/krest.svg');
 	background-repeat: no-repeat;
 }
 .nolik{
-  	background-image: url('../img/circle.svg');
+	background-image: url('../img/circle.svg');
 	background-repeat: no-repeat;
 }
-.ico{
+.ico_owner{
 	width: 35px;
 	height: 35px;
 	padding-top: 7px;
+	background-image: url('../img/krest.svg');
+	background-repeat: no-repeat;
+	background-size: contain;
+}
+.ico_opponent{
+	width: 35px;
+	height: 35px;
+	padding-top: 7px;
+	background-image: url('../img/circle.svg');
+	background-repeat: no-repeat;
 }
 .hidden{
     	display: none;
